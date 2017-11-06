@@ -16,29 +16,34 @@ function RectangleMeasureViewModel() {
     self.startlng = ko.observable(0);
     self.finishlat = ko.observable(0);
     self.finishlng = ko.observable(0);
+
+
     self.formattedStartLat=ko.computed({
         read:function(){
-            return formattedLatLng(self.startlat());
+
+            return formattedLatLng((self.startlat() < self.finishlat()) ? self.startlat():self.finishlat());
         },
         write:function(value){
             value=isNaN(value)?0:value;
             self.startlat(value);
-        },
+        }
 //					owner:this
     });
+
+
     self.formattedFinishLat=ko.computed({
         read:function(){
-            return formattedLatLng(self.finishlat());
+            return formattedLatLng((self.startlat() > self.finishlat()) ? self.startlat():self.finishlat());
         },
         write:function(value){
             value=isNaN(value)?0:value;
             self.finishlat(value);
-        },
+        }
 //					owner:this
     });
     self.formattedStartLng=ko.computed({
         read:function(){
-            return formattedLatLng(self.startlng());
+            return formattedLatLng((self.startlng() < self.finishlng()) ? self.startlng():self.finishlng());
         },
         write:function(value){
             value=isNaN(value)?0:value;
@@ -48,7 +53,7 @@ function RectangleMeasureViewModel() {
     });
     self.formattedFinishLng=ko.computed({
         read:function(){
-            return formattedLatLng(self.finishlng());
+            return formattedLatLng((self.startlng() > self.finishlng()) ? self.startlng():self.finishlng());
         },
         write:function(value){
             value=isNaN(value)?0:value;

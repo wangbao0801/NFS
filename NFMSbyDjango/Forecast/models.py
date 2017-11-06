@@ -58,9 +58,9 @@ class R_UserInfo_Action(models.Model):
         db_table="r_userinfo_action"
 
 class CmdInfo:
-    '''
-    实现生成linux端存储的随机文件名的功能
-    '''
+    # '''
+    # 实现生成linux端存储的随机文件名的功能
+    # '''
     def __init__(self,sh,date,interval,lat_start,lat_finish,lon_start,lon_finish):
         '''
 
@@ -96,10 +96,10 @@ class CmdInfo:
     #     self.targetfile=self.targetfile()
 
     def toCmdbyStr(self):
-        '''
-        生成cmd字符串
-        :return:
-        '''
+        # '''
+        # 生成cmd字符串
+        # :return:
+        # '''
         str_cmd = "./zyf/test/sfc.sh %s %s %s %s %s %s %s" % (
             self.date, self.interval, self.lat_start, self.lat_finish, self.lon_start, self.lon_finish,
             self.targetfile
@@ -109,18 +109,18 @@ class CmdInfo:
 
     @property
     def __targetfile_str(self):
-        '''
-        获取生成的文件名称
-        每实例化一次本类，才生成一个guid作为targetfile的一个参考变量
-        :return:
-        '''
+        # '''
+        # 获取生成的文件名称
+        # 每实例化一次本类，才生成一个guid作为targetfile的一个参考变量
+        # :return:
+        # '''
         self.targetfile="{}{}.gif".format("test",self.guid)
         return self.targetfile
 
 class BaseResultInfo:
-    '''
-    基础的返回信息父类
-    '''
+    # '''
+    # 基础的返回信息父类
+    # '''
     def __init__(self,code=None,result=None,message=None):
         self.code=code
         self.result=result
@@ -137,9 +137,9 @@ class RecvResultInfo(BaseResultInfo):
         super().__init__(code,result,message)
 
 class ReturnResultInfo(BaseResultInfo):
-    '''
-    由后台返回给前台显示的信息类（多了一个title属性）
-    '''
+    # '''
+    # 由后台返回给前台显示的信息类（多了一个title属性）
+    # '''
     def __init__(self,code=None,result=None,message=None,title=None):
         # super(ReturnResultInfo, self).__init__()
         # super(ReturnResultInfo, self).__init__()

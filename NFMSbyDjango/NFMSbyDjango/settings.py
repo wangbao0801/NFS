@@ -113,7 +113,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'nfsysbydj',
         'USER': 'root',
-        'PASSWORD': 'icanflyeva',
+        'PASSWORD': 'nmefc123',
         'HOST': '',
         'PORT': '',
     }

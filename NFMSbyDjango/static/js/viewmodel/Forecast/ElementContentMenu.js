@@ -31,19 +31,26 @@ function ElementViewModel() {
         new Element(1, "海浪"),
         new Element(2, "风"),
         new Element(3, "海流"),
-        new Element(4, "气压"),
+        new Element(4, "气压")
     ]);
     self.LevelList = ko.observableArray([
         new Level(1, "地面", 2),
-        new Level(2, "250", 2),
-        new Level(3, "500", 2),
-        new Level(4, "700", 2),
-        new Level(5, "850", 2)
+        new Level(2, "250hpa", 2),
+        new Level(3, "500hpa", 2),
+        new Level(4, "700hpa", 2),
+        new Level(5, "850hpa", 2)
     ]);
     self.IntervalList = ko.observableArray([
-        new Interval(1, "0", 2),
-        new Interval(6, "6", 2),
+        new Interval(1, "0时", 1),
+        new Interval(2, "3时", 1),
+        new Interval(3, "6时", 1),
+        new Interval(4, "9时", 1),
+        new Interval(1, "0时", 2),
+        new Interval(2, "3时", 2),
+        new Interval(3, "6时", 2),
+        new Interval(4, "9时", 2)
     ]);
+
 
     self.CurrentLevelList = ko.computed(function() {
         return ko.utils.arrayFilter(self.LevelList(), function(level) {
