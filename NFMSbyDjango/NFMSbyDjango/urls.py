@@ -32,6 +32,7 @@ urlpatterns = [
     # url(r'Forecast/actions*',views.getActions),
     # url(r'^Forecast/selectMapping',views.selectMapping),
      url(r'^Forecast/Test*',views.test),
+     url(r'^Forecast/NFSRoute*',views.route),
      url(r'Forecast/init',views.initModelData),
      #url(r'Forecast/actions?(?P<uid>\d+)&(?P<pwd>\s+)',views.getActions)
      url(r'Forecast/actions*',views.getActions),
@@ -43,6 +44,6 @@ urlpatterns = [
     # url(r'^download/(?P<path>.*)','django.views.static.serve', {'document_root':'/download'}),
 ]
 
-#加载图片时需要使用的
+#锟斤拷锟斤拷图片时锟斤拷要使锟矫碉拷
 # urlpatterns += staticfiles_urlpatterns()
 # print(urlpatterns)

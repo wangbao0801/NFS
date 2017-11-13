@@ -34,6 +34,13 @@ def test(request):
 
     return render(request, 'Forecast/Test.html', {'list_actions': list_nodes})
 
+def route(request):
+    name = request.GET.get('name', None)
+    pwd = request.GET.get('pwd', None)
+    list_nodes = getActions(name, pwd)
+
+    return render(request, 'Forecast/NFSRoute.html', {'list_actions': list_nodes})
+
 def initModelData(request):
     obj= models.UserInfo(Name="ceshi",Pwd="123")
     obj.save()
@@ -271,3 +278,52 @@ def searchHistory(request):
             html += line
         return_json={'image_url':data_dict[files[0]],'html':html}
     return JsonResponse(return_json)
+
+def NFMRoute(request):
+
+    # host = "202.108.199.42"
+    # port = 22
+    # user = "climate"
+    # pswd = "climatenew123"
+
+    # host = "128.5.6.21"
+    # port = 22
+    # user = "lingtj"
+    # pswd = "lingtj123"
+
+
+    host = "128.5.6.21"
+    port = 22
+    user = "lingtj"
+    pswd = "lingtj123"
+    # ssh = paramiko.SSHClient()
+    # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # ssh.connect(host, port, user, pswd)
+    # # stdin, stdout, stderr = ssh.exec_command('./zyf/test/sfc.sh 2013040100 0 0.0 50.0 100.0 170.0 test1016.gif')
+    # # stdin, stdout, stderr = ssh.exec_command('cd zyf')
+    # stdin, stdout, stderr = ssh.exec_command('cd zyf/test')
+    # # time.sleep(10)
+    # results = stdout.read()
+    # print(results)
+    # ssh.close()
+    client = utils.ParamikoClient(host, user, pswd)
+    result = client.exec_shell('./zyf/test/sfc.sh 2013040100 6 0.0 50.0 100.0 170.0 test102417.gif')
+    sftpclient = utils.SFtpClient(host,user, pswd)
+    recv_obj = sftpclient.sftp_download("", "zyf/test/", "test102417.gif")
+
+    if request.method == "POST":
+        dt = request.POST.get('datetime')
+        hour = request.POST.get('startHour')
+        elmt = request.POST.get('element')
+        route = request.POST.get('routeInfo')
+        print(route)
+
+
+
+
+        # ps = winspawn('ssh -l %s %s %s'%('climate', '202.108.199.42', 'touch wb.txt'))
+
+
+        # temp = ssh_command('climate', '202.108.199.42', 'climatenew123', 'touch 1.txt')
+        # print(temp)
+    return render(request, "Forecast/NFSRoute.html",)
